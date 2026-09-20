@@ -1,5 +1,6 @@
 package com.jobportal.repository;
 
+import com.jobportal.entity.ApplicationStatus;
 import com.jobportal.entity.JobApplication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +30,5 @@ public interface JobApplicationRepository
             Long recruiterId,
             Pageable pageable
     );
+    long countByStatus(ApplicationStatus status);
 }

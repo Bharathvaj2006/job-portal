@@ -89,10 +89,7 @@
 			<version>5.4.1</version>
 		</dependency>
 
-
-
 	</dependencies>
-
 
 	<build>
 		<plugins>

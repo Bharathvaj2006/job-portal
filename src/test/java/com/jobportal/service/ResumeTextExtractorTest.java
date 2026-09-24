@@ -33,18 +33,16 @@ class ResumeTextExtractorTest {
 
             createTestPdf(pdfPath);
 
-            CandidateResume resume =
-                    new CandidateResume(
-                            "resume.pdf",
-                            "application/pdf",
-                            Files.size(pdfPath),
-                            pdfPath.toString(),
-                            LocalDateTime.now(),
-                            null
-                    );
+            CandidateResume resume = new CandidateResume(
+                                    "resume.pdf",
+                                    "application/pdf",
+                                    Files.size(pdfPath),
+                                    pdfPath.toString(),
+                                    LocalDateTime.now(),
+                                    null
+                                    );
 
-            String extractedText =
-                    extractor.extractText(resume);
+            String extractedText = extractor.extractText(resume);
 
             assertTrue(
                     extractedText.contains("Java"),
@@ -65,11 +63,10 @@ class ResumeTextExtractorTest {
     @Test
     void shouldExtractTextFromDocx() throws Exception {
 
-        Path docxPath =
-                Files.createTempFile(
+        Path docxPath = Files.createTempFile(
                         "resume-test-",
                         ".docx"
-                );
+                        );
 
         try {
 

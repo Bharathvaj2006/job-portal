@@ -15,3 +15,39 @@ Frontend/.env
 # Root IDE files
 .idea/
 *.iml
+
+
+# =========================
+# Frontend (React + Vite)
+# =========================
+
+# Dependencies
+Frontend/node_modules/
+
+# Build output
+Frontend/dist/
+
+# Vite cache
+Frontend/.vite/
+
+# Environment variables (may contain secrets)
+Frontend/.env
+Frontend/.env.*
+!Frontend/.env.example
+
+# Test and coverage output
+Frontend/coverage/
+
+# Logs
+Frontend/*.log
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/pnpm-debug.log*
+
+# Local IDE settings
+Frontend/.idea/
+Frontend/.vscode/
+
+# OS generated files
+Frontend/.DS_Store
+Frontend/Thumbs.db

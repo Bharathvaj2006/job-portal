@@ -219,3 +219,46 @@
     display: none;
   }
 }
+
+.dashboard-error {
+  margin-bottom: 20px;
+  padding: 13px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.resume-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 35px;
+  padding: 20px;
+  border: 1px solid #e8edf4;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.resume-summary h2 {
+  margin: 0 0 7px;
+  font-size: 17px;
+}
+
+.resume-summary p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.resume-badge {
+  padding: 6px 11px;
+  border-radius: 20px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -14,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.jobportal.exception.ResourceNotFoundException;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -130,5 +133,113 @@ class ResumeAnalysisControllerSecurityTest {
                                 jsonPath("$.missingSkills[1]")
                                 .value("aws")
                 );
+    }
+
+    @Test
+    @WithMockUser(
+            username = "candidate@example.com",
+            roles = "CANDIDATE"
+    )
+    void candidateShouldGetLatestAnalysis() throws Exception {
+
+        ResumeAnalysisResponse response =
+                new ResumeAnalysisResponse(
+                        15L,
+                        "Java Backend Developer",
+                        60.0,
+                        java.util.List.of(
+                                "java",
+                                "spring boot",
+                                "postgresql"
+                        ),
+                        java.util.List.of(
+                                "docker",
+                                "aws"
+                        )
+                );
+
+        when(resumeAnalysisService.getLatestAnalysis(
+                "candidate@example.com"
+        )).thenReturn(response);
+
+        mockMvc.perform(
+                        get("/api/resume-analysis/latest")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jobId").value(15))
+                .andExpect(jsonPath("$.jobTitle")
+                        .value("Java Backend Developer"))
+                .andExpect(jsonPath("$.matchPercentage")
+                        .value(60.0))
+                .andExpect(jsonPath("$.matchedSkills[0]")
+                        .value("java"))
+                .andExpect(jsonPath("$.matchedSkills[1]")
+                        .value("spring boot"))
+                .andExpect(jsonPath("$.matchedSkills[2]")
+                        .value("postgresql"))
+                .andExpect(jsonPath("$.missingSkills[0]")
+                        .value("docker"))
+                .andExpect(jsonPath("$.missingSkills[1]")
+                        .value("aws"));
+    }
+
+    @Test
+    @WithMockUser(
+            username = "candidate@example.com",
+            roles = "CANDIDATE"
+    )
+    void candidateShouldReceiveNotFoundWhenNoAnalysisExists()
+            throws Exception {
+
+        when(resumeAnalysisService.getLatestAnalysis(
+                "candidate@example.com"
+        )).thenThrow(
+                new ResourceNotFoundException(
+                        "No resume analysis found"
+                )
+        );
+
+        mockMvc.perform(
+                        get("/api/resume-analysis/latest")
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(
+            username = "recruiter@example.com",
+            roles = "RECRUITER"
+    )
+    void recruiterShouldBeForbiddenFromGettingLatestAnalysis()
+            throws Exception {
+
+        mockMvc.perform(
+                        get("/api/resume-analysis/latest")
+                )
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(
+            username = "admin@example.com",
+            roles = "ADMIN"
+    )
+    void adminShouldBeForbiddenFromGettingLatestAnalysis()
+            throws Exception {
+
+        mockMvc.perform(
+                        get("/api/resume-analysis/latest")
+                )
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unauthenticatedUserShouldBeUnauthorized()
+            throws Exception {
+
+        mockMvc.perform(
+                        get("/api/resume-analysis/latest")
+                )
+                .andExpect(status().isUnauthorized());
     }
 }

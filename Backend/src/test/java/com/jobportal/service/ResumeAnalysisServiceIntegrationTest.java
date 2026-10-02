@@ -9,6 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.jobportal.entity.User;
+import com.jobportal.repository.UserRepository;
+import com.jobportal.repository.ResumeAnalysisRepository;
+import com.jobportal.entity.ResumeAnalysis;
 
 import java.util.Optional;
 
@@ -27,8 +31,11 @@ class ResumeAnalysisServiceIntegrationTest {
     @Mock
     private ResumeTextExtractor resumeTextExtractor;
 
-    @InjectMocks
-    private ResumeAnalysisService resumeAnalysisService;
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ResumeAnalysisRepository resumeAnalysisRepository;
 
     private final SkillParser skillParser = new SkillParser();
     private final SkillMatcher skillMatcher = new SkillMatcher();
@@ -46,6 +53,11 @@ class ResumeAnalysisServiceIntegrationTest {
         Job job = mock(Job.class);
 
         when(job.getId()).thenReturn(jobId);
+
+        User candidate = mock(User.class);
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(candidate));
 
         when(job.getTitle())
                 .thenReturn("Java Backend Developer");
@@ -80,7 +92,9 @@ class ResumeAnalysisServiceIntegrationTest {
                         skillParser,
                         skillMatcher,
                         skillMatchCalculator,
-                        skillGapAnalyzer
+                        skillGapAnalyzer,
+                        userRepository,
+                        resumeAnalysisRepository
                 );
 
         ResumeAnalysisResponse response =
@@ -128,5 +142,10 @@ class ResumeAnalysisServiceIntegrationTest {
 
         verify(resumeTextExtractor)
                 .extractText(resume);
+
+        verify(userRepository).findByEmail(email);
+
+        verify(resumeAnalysisRepository)
+                .save(any(ResumeAnalysis.class));
     }
 }

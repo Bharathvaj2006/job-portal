@@ -34,4 +34,16 @@ public class ResumeAnalysisController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/latest")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<ResumeAnalysisResponse> getLatestAnalysis(
+            Principal principal) {
+
+        ResumeAnalysisResponse response =
+                resumeAnalysisService.getLatestAnalysis(
+                        principal.getName());
+
+        return ResponseEntity.ok(response);
+    }
 }

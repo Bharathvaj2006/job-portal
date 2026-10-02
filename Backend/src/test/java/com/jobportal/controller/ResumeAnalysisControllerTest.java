@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import com.jobportal.exception.ResourceNotFoundException;
 
 import java.security.Principal;
 import java.util.List;
@@ -85,5 +86,85 @@ class ResumeAnalysisControllerTest {
 
         verify(resumeAnalysisService)
                 .analyzeResume(jobId, email);
+    }
+
+    @Test
+    void shouldGetLatestAnalysisSuccessfully() {
+
+        String email = "candidate@example.com";
+        Long jobId = 15L;
+
+        ResumeAnalysisResponse response =
+                new ResumeAnalysisResponse(
+                        jobId,
+                        "Java Backend Developer",
+                        60.0,
+                        List.of("java", "spring boot", "postgresql"),
+                        List.of("docker", "aws")
+                );
+
+        when(principal.getName()).thenReturn(email);
+
+        when(resumeAnalysisService.getLatestAnalysis(email))
+                .thenReturn(response);
+
+        ResponseEntity<ResumeAnalysisResponse> result =
+                resumeAnalysisController.getLatestAnalysis(principal);
+
+        assertEquals(200, result.getStatusCode().value());
+
+        assertNotNull(result.getBody());
+
+        assertEquals(jobId, result.getBody().getJobId());
+
+        assertEquals(
+                "Java Backend Developer",
+                result.getBody().getJobTitle()
+        );
+
+        assertEquals(
+                60.0,
+                result.getBody().getMatchPercentage()
+        );
+
+        assertEquals(
+                List.of("java", "spring boot", "postgresql"),
+                result.getBody().getMatchedSkills()
+        );
+
+        assertEquals(
+                List.of("docker", "aws"),
+                result.getBody().getMissingSkills()
+        );
+
+        verify(principal).getName();
+
+        verify(resumeAnalysisService)
+                .getLatestAnalysis(email);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNoAnalysisExists() {
+
+        String email = "candidate@example.com";
+
+        when(principal.getName()).thenReturn(email);
+
+        when(resumeAnalysisService.getLatestAnalysis(email))
+                .thenThrow(
+                        new ResourceNotFoundException(
+                                "No resume analysis found"
+                        )
+                );
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> resumeAnalysisController.getLatestAnalysis(principal)
+        );
+
+        verify(principal).getName();
+
+        verify(resumeAnalysisService)
+                .getLatestAnalysis(email);
     }
 }

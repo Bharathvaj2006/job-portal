@@ -23,57 +23,86 @@ function Dashboard() {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [applicationCount, setApplicationCount] = useState(null);
+  const [skillMatch, setSkillMatch] = useState(null);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const results = await Promise.allSettled([
+        candidateService.getJobs(),
+        candidateService.getResume(),
+        candidateService.getMyApplications(0, 1),
+        candidateService.getLatestAnalysis(),
+      ]);
+
+      const [jobsResult, resumeResult, applicationsResult, analysisResult] =
+        results;
+
+      if (jobsResult.status === "fulfilled") {
+        const data = jobsResult.value.data;
+
+        if (Array.isArray(data)) {
+          setJobCount(data.length);
+        } else if (Array.isArray(data?.content)) {
+          setJobCount(data.totalElements ?? data.content.length);
+        } else {
+          setJobCount(null);
+        }
+      } else {
+        setJobCount(null);
+      }
+
+      if (resumeResult.status === "fulfilled") {
+        setResume(resumeResult.value.data);
+      } else if (resumeResult.reason?.response?.status === 404) {
+        setResume(null);
+      } else {
+        setResume(null);
+      }
+
+      if (applicationsResult.status === "fulfilled") {
+        setApplicationCount(
+          applicationsResult.value.data.totalElements
+        );
+      } else {
+        setApplicationCount(null);
+      }
+
+      if (analysisResult.status === "fulfilled") {
+        setSkillMatch(analysisResult.value.data.matchPercentage);
+      } else if (analysisResult.reason?.response?.status === 404) {
+        setSkillMatch(null);
+      } else {
+        setSkillMatch(null);
+        console.error(
+          "Failed to fetch latest resume analysis:",
+          analysisResult.reason
+        );
+      }
+
+      const jobsFailed = jobsResult.status === "rejected";
+
+      const resumeFailed =
+        resumeResult.status === "rejected" &&
+        resumeResult.reason?.response?.status !== 404;
+
+      const applicationsFailed =
+        applicationsResult.status === "rejected";
+
+      if (jobsFailed && resumeFailed && applicationsFailed) {
+        setError("Unable to load dashboard data. Please try again.");
+      }
+    } catch (error) {
+      setError("Something went wrong while loading your dashboard.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      const applicationsResult =
-        await candidateService.getMyApplications(0, 1);
-
-      console.log("Applications response:", applicationsResult.data);
-
-      setLoading(true);
-      setError("");
-
-      try {
-        const [jobsResult, resumeResult] = await Promise.allSettled([
-          candidateService.getJobs(),
-          candidateService.getResume(),
-        ]);
-
-        if (jobsResult.status === "fulfilled") {
-          const data = jobsResult.value.data;
-
-          // Supports both a plain array and Spring Page responses.
-          if (Array.isArray(data)) {
-            setJobCount(data.length);
-          } else if (Array.isArray(data?.content)) {
-            setJobCount(data.totalElements ?? data.content.length);
-          } else {
-            setJobCount(null);
-          }
-        }
-
-        if (resumeResult.status === "fulfilled") {
-          setResume(resumeResult.value.data);
-        } else if (resumeResult.reason?.response?.status === 404) {
-          // A candidate may not have uploaded a resume yet.
-          setResume(null);
-        }
-
-        if (
-          jobsResult.status === "rejected" &&
-          resumeResult.status === "rejected" &&
-          resumeResult.reason?.response?.status !== 404
-        ) {
-          setError("Unable to load dashboard data. Please try again.");
-        }
-      } catch {
-        setError("Something went wrong while loading your dashboard.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, []);
 
@@ -91,7 +120,7 @@ function Dashboard() {
     },
     {
       title: "Applications",
-      value: "—",
+      value: applicationCount === null ? "—" : applicationCount,
       icon: <Send />,
       color: "green",
     },
@@ -103,7 +132,7 @@ function Dashboard() {
     },
     {
       title: "Skill Match",
-      value: "—",
+      value: skillMatch === null ? "Not analyzed" : `${skillMatch}%`,
       icon: <ChartNoAxesCombined />,
       color: "orange",
     },

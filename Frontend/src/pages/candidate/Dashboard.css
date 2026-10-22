@@ -262,3 +262,25 @@
   font-size: 12px;
   font-weight: 600;
 }
+
+
+.dashboard-page .dashboard-welcome h1 {
+  color: #172033;
+}
+
+.dashboard-page .stat-card h2 {
+  color: #172033;
+  font-weight: 700;
+}
+
+.dashboard-page .resume-summary h2 {
+  color: #172033;
+}
+
+.dashboard-page .dashboard-section > h2 {
+  color: #172033;
+}
+
+.dashboard-page .action-content h3 {
+  color: #172033;
+}

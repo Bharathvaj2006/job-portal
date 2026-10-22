@@ -9,6 +9,7 @@ import {
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/candidate/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ResumeAnalysis from "./pages/candidate/ResumeAnalysis";
 
 function App() {
   return (
@@ -26,6 +27,11 @@ function App() {
         <Route
           path="/"
           element={<Navigate to="/candidate/dashboard" replace />}
+        />
+
+        <Route
+          path="/candidate/resume-analysis"
+          element={<ResumeAnalysis />}
         />
 
         <Route

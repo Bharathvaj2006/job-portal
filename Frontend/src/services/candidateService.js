@@ -18,4 +18,40 @@ export const candidateService = {
   getLatestAnalysis() {
     return api.get("/resume-analysis/latest");
   },
+
+  analyzeResume(jobId) {
+    return api.post(`/resume-analysis/jobs/${jobId}`);
+  },
+
+  uploadResume(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return api.post("/candidate/profile/resume", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  replaceResume(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return api.put("/candidate/profile/resume", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  downloadResume() {
+    return api.get("/candidate/profile/resume/download", {
+      responseType: "blob",
+    });
+  },
+
+  deleteResume() {
+    return api.delete("/candidate/profile/resume");
+  },
 };

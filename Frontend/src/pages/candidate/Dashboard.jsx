@@ -149,7 +149,7 @@ function Dashboard() {
       title: "Manage Resume",
       description: "Upload or update your resume",
       icon: <FileUp />,
-      path: "/candidate/resume",
+      path: "/candidate/resume-management",
     },
     {
       title: "Analyze Resume",

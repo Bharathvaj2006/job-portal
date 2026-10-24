@@ -33,7 +33,6 @@ function ResumeAnalysis() {
         candidateService.getLatestAnalysis(),
       ]);
 
-      // Load available jobs
       if (jobsResult.status === "fulfilled") {
         const data = jobsResult.value.data;
 
@@ -97,10 +96,13 @@ function ResumeAnalysis() {
     } catch (err) {
       console.error("Resume analysis failed:", err);
 
+
       setError(
         err.response?.data?.message ||
+        err.userMessage ||
         "Unable to analyze your resume. Please try again."
       );
+
     } finally {
       setAnalyzing(false);
     }

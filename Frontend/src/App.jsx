@@ -10,6 +10,7 @@ import Login from "./pages/auth/Login";
 import Dashboard from "./pages/candidate/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ResumeAnalysis from "./pages/candidate/ResumeAnalysis";
+import ResumeManagement from "./pages/candidate/ResumeManagement";
 
 function App() {
   return (
@@ -22,16 +23,21 @@ function App() {
             path="/candidate/dashboard"
             element={<Dashboard />}
           />
+
+          <Route
+            path="/candidate/resume-analysis"
+            element={<ResumeAnalysis />}
+          />
+
+          <Route
+            path="/candidate/resume-management"
+            element={<ResumeManagement />}
+          />
         </Route>
 
         <Route
           path="/"
           element={<Navigate to="/candidate/dashboard" replace />}
-        />
-
-        <Route
-          path="/candidate/resume-analysis"
-          element={<ResumeAnalysis />}
         />
 
         <Route

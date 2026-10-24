@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { candidateService } from "../../services/candidateService";
 import "./ResumeManagement.css";
+import { Link } from "react-router-dom";
 
 function ResumeManagement() {
   const [resume, setResume] = useState(null);
@@ -38,7 +39,9 @@ function ResumeManagement() {
         setResume(null);
       } else {
         setError(
-          err.response?.data?.message || "Unable to load resume."
+          err.response?.data?.message ||
+          err.userMessage ||
+          "Unable to load resume."
         );
       }
     } finally {
@@ -98,9 +101,13 @@ function ResumeManagement() {
 
       await fetchResume();
     } catch (err) {
+
       setError(
-        err.response?.data?.message || "Resume upload failed."
+        err.response?.data?.message ||
+        err.userMessage ||
+        "Resume upload failed."
       );
+
     } finally {
       setProcessing(false);
     }
@@ -125,9 +132,13 @@ function ResumeManagement() {
 
       window.URL.revokeObjectURL(fileUrl);
     } catch (err) {
+
       setError(
-        err.response?.data?.message || "Unable to download resume."
+        err.response?.data?.message ||
+        err.userMessage ||
+        "Unable to download resume."
       );
+
     } finally {
       setProcessing(false);
     }
@@ -153,9 +164,13 @@ function ResumeManagement() {
       }
       setMessage("Resume deleted successfully.");
     } catch (err) {
+
       setError(
-        err.response?.data?.message || "Unable to delete resume."
+        err.response?.data?.message ||
+        err.userMessage ||
+        "Unable to delete resume."
       );
+
     } finally {
       setProcessing(false);
     }
@@ -179,146 +194,159 @@ function ResumeManagement() {
   }
 
   return (
-    <div className="resume-management">
-      <div className="resume-page-heading">
-        <div>
-          <h1>Resume Management</h1>
-          <p>Upload and manage the resume used for your job applications.</p>
-        </div>
-      </div>
-
-      {message && (
-        <div className="resume-message success">
-          <CheckCircle2 size={18} />
-          <span>{message}</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="resume-message error">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <section className="resume-card">
-        <div className="resume-card-heading">
-          <div className="resume-icon">
+    <>
+      <header className="resume-topbar">
+        <Link to="/candidate/dashboard" className="resume-brand">
+          <span className="resume-brand-icon">
             <FileText size={25} />
-          </div>
-          <div>
-            <h2>Your Resume</h2>
-            <p>
-              {resume
-                ? "Your resume is available in your profile."
-                : "You have not uploaded a resume yet."}
-            </p>
-          </div>
-        </div>
+          </span>
+          <span>JobPortal</span>
+        </Link>
 
-        {resume && (
-          <div className="resume-file-details">
-            <div className="resume-file-icon">
-              <FileText size={30} />
-            </div>
+        <Link
+          to="/candidate/dashboard"
+          className="resume-back-link"
+        >
+          Back to Dashboard
+        </Link>
+      </header>
+      <div className="resume-management">
 
-            <div className="resume-file-info">
-              <strong>{resume.fileName}</strong>
-              <span>
-                {resume.fileType || "Resume"} ·{" "}
-                {formatFileSize(resume.fileSize)}
-              </span>
-              {resume.uploadedAt && (
-                <span>
-                  Uploaded:{" "}
-                  {new Date(resume.uploadedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
 
-            <span className="resume-status">
-              <CheckCircle2 size={15} />
-              Uploaded
-            </span>
+
+        {message && (
+          <div className="resume-message success">
+            <CheckCircle2 size={18} />
+            <span>{message}</span>
           </div>
         )}
 
-        <div className="resume-upload-area">
-          <div className="upload-icon">
-            <Upload size={30} />
+        {error && (
+          <div className="resume-message error">
+            <AlertCircle size={18} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <section className="resume-card">
+          <div className="resume-card-heading">
+            <div className="resume-icon">
+              <FileText size={25} />
+            </div>
+            <div>
+              <h2>Your Resume</h2>
+              <p>
+                {resume
+                  ? "Your resume is available in your profile."
+                  : "You have not uploaded a resume yet."}
+              </p>
+            </div>
           </div>
 
-          <h3>{resume ? "Replace your resume" : "Upload your resume"}</h3>
-          <p>Choose a PDF or DOCX file from your device.</p>
+          {resume && (
+            <div className="resume-file-details">
+              <div className="resume-file-icon">
+                <FileText size={30} />
+              </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            onChange={handleFileChange}
-            className="resume-file-input"
-            id="resume-file"
-          />
+              <div className="resume-file-info">
+                <strong>{resume.fileName}</strong>
+                <span>
+                  {resume.fileType || "Resume"} ·{" "}
+                  {formatFileSize(resume.fileSize)}
+                </span>
+                {resume.uploadedAt && (
+                  <span>
+                    Uploaded:{" "}
+                    {new Date(resume.uploadedAt).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
 
-          <label htmlFor="resume-file" className="choose-file-button">
-            Choose File
-          </label>
-
-          {selectedFile && (
-            <div className="selected-file">
-              <FileText size={17} />
-              <span>{selectedFile.name}</span>
+              <span className="resume-status">
+                <CheckCircle2 size={15} />
+                Uploaded
+              </span>
             </div>
           )}
 
-          <button
-            className="resume-primary-button"
-            onClick={handleUpload}
-            disabled={!selectedFile || processing}
-          >
-            {processing ? (
-              "Please wait..."
-            ) : resume ? (
-              <>
-                <RefreshCw size={17} /> Replace Resume
-              </>
-            ) : (
-              <>
-                <Upload size={17} /> Upload Resume
-              </>
+          <div className="resume-upload-area">
+            <div className="upload-icon">
+              <Upload size={30} />
+            </div>
+
+            <h3>{resume ? "Replace your resume" : "Upload your resume"}</h3>
+            <p>Choose a PDF or DOCX file from your device.</p>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={handleFileChange}
+              className="resume-file-input"
+              id="resume-file"
+            />
+
+            <label htmlFor="resume-file" className="choose-file-button">
+              Choose File
+            </label>
+
+            {selectedFile && (
+              <div className="selected-file">
+                <FileText size={17} />
+                <span>{selectedFile.name}</span>
+              </div>
             )}
-          </button>
-        </div>
-
-        {resume && (
-          <div className="resume-actions">
-            <button
-              className="resume-secondary-button"
-              onClick={handleDownload}
-              disabled={processing}
-            >
-              <Download size={17} />
-              Download
-            </button>
 
             <button
-              className="resume-delete-button"
-              onClick={handleDelete}
-              disabled={processing}
+              className="resume-primary-button"
+              onClick={handleUpload}
+              disabled={!selectedFile || processing}
             >
-              <Trash2 size={17} />
-              Delete
+              {processing ? (
+                "Please wait..."
+              ) : resume ? (
+                <>
+                  <RefreshCw size={17} /> Replace Resume
+                </>
+              ) : (
+                <>
+                  <Upload size={17} /> Upload Resume
+                </>
+              )}
             </button>
           </div>
-        )}
-      </section>
 
-      <div className="resume-note">
-        <strong>Note:</strong> Upload a valid PDF or DOCX resume. Your
-        uploaded resume can be used for AI-powered resume analysis and
-        skill-gap detection.
+          {resume && (
+            <div className="resume-actions">
+              <button
+                className="resume-secondary-button"
+                onClick={handleDownload}
+                disabled={processing}
+              >
+                <Download size={17} />
+                Download
+              </button>
+
+              <button
+                className="resume-delete-button"
+                onClick={handleDelete}
+                disabled={processing}
+              >
+                <Trash2 size={17} />
+                Delete
+              </button>
+            </div>
+          )}
+        </section>
+
+        <div className="resume-note">
+          <strong>Note:</strong> Upload a valid PDF or DOCX resume. Your
+          uploaded resume can be used for AI-powered resume analysis and
+          skill-gap detection.
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

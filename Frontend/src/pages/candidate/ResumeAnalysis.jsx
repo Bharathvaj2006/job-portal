@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { candidateService } from "../../services/candidateService";
 import "./ResumeAnalysis.css";
 import { Link } from "react-router-dom";
+import getErrorMessage from "../../utils/getErrorMessage";
 import {
   BriefcaseBusiness,
   BrainCircuit,
@@ -21,6 +22,7 @@ function ResumeAnalysis() {
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState("");
+  const [jobsError, setJobsError] = useState("");
 
 
   useEffect(() => {
@@ -43,10 +45,15 @@ function ResumeAnalysis() {
         setJobs(jobList);
       } else {
         console.error("Failed to load jobs:", jobsResult.reason);
-        setError("Unable to load available jobs.");
+
+        setJobsError(
+          getErrorMessage(
+            jobsResult.reason,
+            "Unable to load available jobs."
+          )
+        );
       }
 
-      // Load the candidate's latest saved analysis
       if (analysisResult.status === "fulfilled") {
         const latestAnalysis = analysisResult.value.data;
 
@@ -95,13 +102,7 @@ function ResumeAnalysis() {
       setAnalysis(response.data);
     } catch (err) {
       console.error("Resume analysis failed:", err);
-
-
-      setError(
-        err.response?.data?.message ||
-        err.userMessage ||
-        "Unable to analyze your resume. Please try again."
-      );
+      setError(getErrorMessage(err, "Unable to analyze your resume. Please try again."));
 
     } finally {
       setAnalyzing(false);
@@ -150,8 +151,21 @@ function ResumeAnalysis() {
           </div>
 
           <label htmlFor="job-select">Available jobs</label>
+
           {loadingJobs ? (
-            <p className="analysis-muted">Loading available jobs...</p>
+            <p className="analysis-muted" role="status">
+              Loading available jobs...
+            </p>
+          ) : jobsError ? (
+            <div className="analysis-error" role="alert">
+              <p>{jobsError}</p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </button>
+            </div>
           ) : jobs.length === 0 ? (
             <p className="analysis-muted">
               No jobs are currently available.

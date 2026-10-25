@@ -12,6 +12,7 @@ import {
 import { candidateService } from "../../services/candidateService";
 import "./ResumeManagement.css";
 import { Link } from "react-router-dom";
+import getErrorMessage from "../../utils/getErrorMessage";
 
 function ResumeManagement() {
   const [resume, setResume] = useState(null);
@@ -23,14 +24,7 @@ function ResumeManagement() {
 
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    fetchResume();
-  }, []);
-
   const fetchResume = async () => {
-    setLoading(true);
-    setError("");
-
     try {
       const response = await candidateService.getResume();
       setResume(response.data);
@@ -38,16 +32,20 @@ function ResumeManagement() {
       if (err.response?.status === 404) {
         setResume(null);
       } else {
-        setError(
-          err.response?.data?.message ||
-          err.userMessage ||
-          "Unable to load resume."
-        );
+        setError(getErrorMessage(err, "Unable to load resume."));
       }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchResume();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
@@ -102,11 +100,7 @@ function ResumeManagement() {
       await fetchResume();
     } catch (err) {
 
-      setError(
-        err.response?.data?.message ||
-        err.userMessage ||
-        "Resume upload failed."
-      );
+      setError(getErrorMessage(err, "Resume upload failed."));
 
     } finally {
       setProcessing(false);
@@ -132,12 +126,7 @@ function ResumeManagement() {
 
       window.URL.revokeObjectURL(fileUrl);
     } catch (err) {
-
-      setError(
-        err.response?.data?.message ||
-        err.userMessage ||
-        "Unable to download resume."
-      );
+      setError(getErrorMessage(err, "Unable to download resume."));
 
     } finally {
       setProcessing(false);
@@ -164,12 +153,7 @@ function ResumeManagement() {
       }
       setMessage("Resume deleted successfully.");
     } catch (err) {
-
-      setError(
-        err.response?.data?.message ||
-        err.userMessage ||
-        "Unable to delete resume."
-      );
+      setError(getErrorMessage(err, "Unable to delete resume."));
 
     } finally {
       setProcessing(false);

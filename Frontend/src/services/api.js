@@ -34,7 +34,6 @@ api.interceptors.response.use(
     if (status === 401 && !isAuthEndpoint) {
       auth.removeToken();
 
-      // Redirect only when the user is not already on the login page.
       if (window.location.pathname !== "/login") {
         window.location.assign("/login");
       }

@@ -15,6 +15,7 @@ import {
 import { auth } from "../../utils/auth";
 import { candidateService } from "../../services/candidateService";
 import "./Dashboard.css";
+import getErrorMessage from "../../utils/getErrorMessage";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -25,11 +26,11 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [applicationCount, setApplicationCount] = useState(null);
   const [skillMatch, setSkillMatch] = useState(null);
+  const [resumeError, setResumeError] = useState(false);
+  const [analysisError, setAnalysisError] = useState(false);
+
 
   const fetchDashboardData = async () => {
-    setLoading(true);
-    setError("");
-
     try {
       const results = await Promise.allSettled([
         candidateService.getJobs(),
@@ -38,8 +39,14 @@ function Dashboard() {
         candidateService.getLatestAnalysis(),
       ]);
 
+      setError("");
+      setResumeError(false);
+      setAnalysisError(false);
+
       const [jobsResult, resumeResult, applicationsResult, analysisResult] =
         results;
+
+      const errors = [];
 
       if (jobsResult.status === "fulfilled") {
         const data = jobsResult.value.data;
@@ -50,9 +57,16 @@ function Dashboard() {
           setJobCount(data.totalElements ?? data.content.length);
         } else {
           setJobCount(null);
+          errors.push("The jobs response was invalid.");
         }
       } else {
         setJobCount(null);
+        errors.push(
+          getErrorMessage(
+            jobsResult.reason,
+            "Unable to load available jobs."
+          )
+        );
       }
 
       if (resumeResult.status === "fulfilled") {
@@ -61,49 +75,75 @@ function Dashboard() {
         setResume(null);
       } else {
         setResume(null);
+        setResumeError(true);
+        errors.push(
+          getErrorMessage(
+            resumeResult.reason,
+            "Unable to load resume status."
+          )
+        );
       }
 
       if (applicationsResult.status === "fulfilled") {
+        const data = applicationsResult.value.data;
+
         setApplicationCount(
-          applicationsResult.value.data.totalElements
+          data?.totalElements ??
+          data?.content?.length ??
+          null
         );
       } else {
         setApplicationCount(null);
+        errors.push(
+          getErrorMessage(
+            applicationsResult.reason,
+            "Unable to load application count."
+          )
+        );
       }
 
       if (analysisResult.status === "fulfilled") {
-        setSkillMatch(analysisResult.value.data.matchPercentage);
+        setSkillMatch(
+          analysisResult.value.data?.matchPercentage ?? null
+        );
       } else if (analysisResult.reason?.response?.status === 404) {
         setSkillMatch(null);
       } else {
         setSkillMatch(null);
+        setAnalysisError(true);
+
+        errors.push(
+          getErrorMessage(
+            analysisResult.reason,
+            "Unable to load the latest resume analysis."
+          )
+        );
+
         console.error(
           "Failed to fetch latest resume analysis:",
           analysisResult.reason
         );
       }
 
-      const jobsFailed = jobsResult.status === "rejected";
-
-      const resumeFailed =
-        resumeResult.status === "rejected" &&
-        resumeResult.reason?.response?.status !== 404;
-
-      const applicationsFailed =
-        applicationsResult.status === "rejected";
-
-      if (jobsFailed && resumeFailed && applicationsFailed) {
-        setError("Unable to load dashboard data. Please try again.");
-      }
-    } catch (error) {
-      setError("Something went wrong while loading your dashboard.");
+      setError([...new Set(errors)].join(" "));
+    } catch (err) {
+      setError(
+        getErrorMessage(
+          err,
+          "Something went wrong while loading your dashboard."
+        )
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    const timeoutId = setTimeout(() => {
+      fetchDashboardData();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleLogout = () => {
@@ -126,13 +166,21 @@ function Dashboard() {
     },
     {
       title: "Resume Status",
-      value: resume ? "Uploaded" : "Not uploaded",
+      value: resumeError
+        ? "Unavailable"
+        : resume
+          ? "Uploaded"
+          : "Not uploaded",
       icon: <FileUser />,
       color: "purple",
     },
     {
       title: "Skill Match",
-      value: skillMatch === null ? "Not analyzed" : `${skillMatch}%`,
+      value: analysisError
+        ? "Unavailable"
+        : skillMatch === null
+          ? "Not analyzed"
+          : `${skillMatch}%`,
       icon: <ChartNoAxesCombined />,
       color: "orange",
     },
@@ -217,7 +265,7 @@ function Dashboard() {
           ))}
         </section>
 
-        {resume && (
+        {resume && !resumeError && (
           <section className="resume-summary">
             <div>
               <h2>Your Resume</h2>

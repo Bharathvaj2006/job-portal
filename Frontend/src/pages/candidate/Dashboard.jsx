@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   BriefcaseBusiness,
   Send,
@@ -9,16 +9,12 @@ import {
   FileUp,
   BrainCircuit,
   UserRound,
-  LogOut,
 } from "lucide-react";
-
-import { auth } from "../../utils/auth";
 import { candidateService } from "../../services/candidateService";
 import "./Dashboard.css";
 import getErrorMessage from "../../utils/getErrorMessage";
 
 function Dashboard() {
-  const navigate = useNavigate();
 
   const [jobCount, setJobCount] = useState(null);
   const [resume, setResume] = useState(null);
@@ -146,11 +142,6 @@ function Dashboard() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const handleLogout = () => {
-    auth.removeToken();
-    navigate("/login", { replace: true });
-  };
-
   const stats = [
     {
       title: "Available Jobs",
@@ -215,21 +206,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      <header className="dashboard-header">
-        <Link to="/candidate/dashboard" className="dashboard-brand">
-          JobPortal
-        </Link>
-
-        <div className="dashboard-header-right">
-          <span className="candidate-label">Candidate</span>
-
-          <button className="logout-button" onClick={handleLogout}>
-            <LogOut size={17} />
-            Logout
-          </button>
-        </div>
-      </header>
-
       <main className="dashboard-container">
         <section className="dashboard-welcome">
           <div>

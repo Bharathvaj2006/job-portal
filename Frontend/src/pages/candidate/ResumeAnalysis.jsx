@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { candidateService } from "../../services/candidateService";
 import "./ResumeAnalysis.css";
-import { Link } from "react-router-dom";
 import getErrorMessage from "../../utils/getErrorMessage";
 import {
   BriefcaseBusiness,
@@ -112,17 +111,7 @@ function ResumeAnalysis() {
 
   return (
     <div className="analysis-page">
-      <header className="analysis-header">
-        <Link to="/candidate/dashboard" className="analysis-brand">
-          <BrainCircuit size={25} />
-          <span>JobPortal</span>
-        </Link>
-
-        <Link to="/candidate/dashboard" className="back-link">
-          Back to Dashboard
-        </Link>
-      </header>
-
+      
       <main className="analysis-container">
         <section className="analysis-heading">
           <span className="analysis-eyebrow">AI-POWERED TOOL</span>

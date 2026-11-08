@@ -1,12 +1,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import Dashboard from "./Dashboard";
 import { candidateService } from "../../services/candidateService";
-import { auth } from "../../utils/auth";
 
 const { mockedNavigate } = vi.hoisted(() => ({
   mockedNavigate: vi.fn(),
@@ -171,16 +169,4 @@ describe("Dashboard", () => {
     expect(screen.getByText("85%")).toBeInTheDocument();
   });
 
-  it("logs out and navigates to the login page", async () => {
-    const user = userEvent.setup();
-
-    renderDashboard();
-
-    await user.click(screen.getByRole("button", { name: /logout/i }));
-
-    expect(auth.removeToken).toHaveBeenCalledOnce();
-    expect(mockedNavigate).toHaveBeenCalledWith("/login", {
-      replace: true,
-    });
-  });
 });

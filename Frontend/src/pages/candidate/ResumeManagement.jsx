@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { candidateService } from "../../services/candidateService";
 import "./ResumeManagement.css";
-import { Link } from "react-router-dom";
 import getErrorMessage from "../../utils/getErrorMessage";
 
 function ResumeManagement() {
@@ -179,25 +178,7 @@ function ResumeManagement() {
 
   return (
     <>
-      <header className="resume-topbar">
-        <Link to="/candidate/dashboard" className="resume-brand">
-          <span className="resume-brand-icon">
-            <FileText size={25} />
-          </span>
-          <span>JobPortal</span>
-        </Link>
-
-        <Link
-          to="/candidate/dashboard"
-          className="resume-back-link"
-        >
-          Back to Dashboard
-        </Link>
-      </header>
       <div className="resume-management">
-
-
-
         {message && (
           <div className="resume-message success">
             <CheckCircle2 size={18} />
